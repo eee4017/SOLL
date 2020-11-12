@@ -126,7 +126,8 @@ std::unique_ptr<AsmIdentifier> Sema::CreateAsmIdentifier(const Token &Tok,
       /// misc
       {"keccak256", AsmIdentifier::SpecialIdentifier::keccak256},
       {"invalid", AsmIdentifier::SpecialIdentifier::invalid},
-      {"pop", AsmIdentifier::SpecialIdentifier::pop}};
+      {"pop", AsmIdentifier::SpecialIdentifier::pop}
+  };
   llvm::StringRef Name = Tok.getIdentifierInfo()->getName();
   if (auto Iter = SpecialLookup.find(Name); Iter != SpecialLookup.end()) {
     TypePtr Ty;
@@ -407,7 +408,7 @@ std::unique_ptr<AsmIdentifier> Sema::CreateAsmIdentifier(const Token &Tok,
     case AsmIdentifier::SpecialIdentifier::keccak256: ///< (u256, u256) -> u256
       Ty = std::make_shared<IntegerType>(IntegerType::IntKind::U256);
       Ty = std::make_shared<FunctionType>(std::vector<TypePtr>{Ty, Ty},
-                                          std::vector<TypePtr>{Ty});
+                                          std::vector<TypePtr>{Ty});                           
       break;
     // TODO: implement the rest identifiers
     default:

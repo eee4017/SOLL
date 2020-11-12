@@ -2327,6 +2327,11 @@ ExprValuePtr CodeGenFunction::emitAsmSpecialCallExpr(const AsmIdentifier *SI,
   case AsmIdentifier::SpecialIdentifier::staticcall:
     return ExprValue::getRValue(
         CE, Builder.CreateZExtOrTrunc(emitAsmCallStaticcall(CE), CGM.Int256Ty));
+  case AsmIdentifier::SpecialIdentifier::invalid:
+    CGM.emitTrap();
+    return std::make_shared<ExprValue>();
+  case AsmIdentifier::SpecialIdentifier::pop:
+    return std::make_shared<ExprValue>();
   // TODO:
   // - implement special identifiers below and
   //   move implemented ones above this TODO.
