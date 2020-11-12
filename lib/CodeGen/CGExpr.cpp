@@ -2053,12 +2053,14 @@ llvm::Value *CodeGenFunction::emitAsmCall(const CallExpr *CE) {
   llvm::Value *Gas = emitExpr(Arguments[0])->load(Builder, CGM);
 
   llvm::Value *Address = emitExpr(Arguments[1])->load(Builder, CGM);
+  llvm::Value *TrAddress = Builder.CreateZExtOrTrunc(CGM.getEndianlessValue(Address), AddressTy);
   llvm::Value *AddressPtr = Builder.CreateAlloca(AddressTy);
-  Builder.CreateStore(CGM.getEndianlessValue(Address), AddressPtr);
+  Builder.CreateStore(TrAddress, AddressPtr);
 
   llvm::Value *Value = emitExpr(Arguments[2])->load(Builder, CGM);
-  llvm::Value *ValuePtr = Builder.CreateAlloca(Int256Ty);
-  Builder.CreateStore(CGM.getEndianlessValue(Value), ValuePtr);
+  llvm::Value *TrValue = Builder.CreateZExtOrTrunc(CGM.getEndianlessValue(Value), Int128Ty);
+  llvm::Value *ValuePtr = Builder.CreateAlloca(Int128Ty);
+  Builder.CreateStore(TrValue ,ValuePtr);
 
   llvm::Value *Ptr = emitExpr(Arguments[3])->load(Builder, CGM);
   llvm::Value *Length = emitExpr(Arguments[4])->load(Builder, CGM);
@@ -2081,13 +2083,14 @@ llvm::Value *CodeGenFunction::emitAsmCallCode(const CallExpr *CE) {
   llvm::Value *Gas = emitExpr(Arguments[0])->load(Builder, CGM);
 
   llvm::Value *Address = emitExpr(Arguments[1])->load(Builder, CGM);
+  llvm::Value *TrAddress = Builder.CreateZExtOrTrunc(CGM.getEndianlessValue(Address), AddressTy);
   llvm::Value *AddressPtr = Builder.CreateAlloca(AddressTy);
-  Builder.CreateStore(CGM.getEndianlessValue(Address), AddressPtr);
+  Builder.CreateStore(TrAddress, AddressPtr);
 
   llvm::Value *Value = emitExpr(Arguments[2])->load(Builder, CGM);
-  llvm::Value *ValuePtr = Builder.CreateAlloca(Int256Ty);
-  Builder.CreateStore(CGM.getEndianlessValue(Value), ValuePtr);
-
+  llvm::Value *TrValue = Builder.CreateZExtOrTrunc(CGM.getEndianlessValue(Value), Int128Ty);
+  llvm::Value *ValuePtr = Builder.CreateAlloca(Int128Ty);
+  Builder.CreateStore(TrValue ,ValuePtr);
   llvm::Value *Ptr = emitExpr(Arguments[3])->load(Builder, CGM);
   llvm::Value *Length = emitExpr(Arguments[4])->load(Builder, CGM);
 
@@ -2109,14 +2112,15 @@ llvm::Value *CodeGenFunction::emitAsmDelegatecall(const CallExpr *CE) {
   llvm::Value *Gas = emitExpr(Arguments[0])->load(Builder, CGM);
 
   llvm::Value *Address = emitExpr(Arguments[1])->load(Builder, CGM);
+  llvm::Value *TrAddress = Builder.CreateZExtOrTrunc(CGM.getEndianlessValue(Address), AddressTy);
   llvm::Value *AddressPtr = Builder.CreateAlloca(AddressTy);
-  Builder.CreateStore(CGM.getEndianlessValue(Address), AddressPtr);
+  Builder.CreateStore(TrAddress, AddressPtr);
 
-  llvm::Value *Ptr = emitExpr(Arguments[3])->load(Builder, CGM);
-  llvm::Value *Length = emitExpr(Arguments[4])->load(Builder, CGM);
+  llvm::Value *Ptr = emitExpr(Arguments[2])->load(Builder, CGM);
+  llvm::Value *Length = emitExpr(Arguments[3])->load(Builder, CGM);
 
-  llvm::Value *OutPtr = emitExpr(Arguments[5])->load(Builder, CGM);
-  llvm::Value *OutLength = emitExpr(Arguments[6])->load(Builder, CGM);
+  llvm::Value *OutPtr = emitExpr(Arguments[4])->load(Builder, CGM);
+  llvm::Value *OutLength = emitExpr(Arguments[5])->load(Builder, CGM);
 
   llvm::Value *Val = CGM.emitCallDelegate(Gas, AddressPtr, Ptr, Length);
 
@@ -2133,14 +2137,16 @@ llvm::Value *CodeGenFunction::emitAsmCallStaticcall(const CallExpr *CE) {
   llvm::Value *Gas = emitExpr(Arguments[0])->load(Builder, CGM);
 
   llvm::Value *Address = emitExpr(Arguments[1])->load(Builder, CGM);
+  llvm::Value *TrAddress = Builder.CreateZExtOrTrunc(CGM.getEndianlessValue(Address), AddressTy);
   llvm::Value *AddressPtr = Builder.CreateAlloca(AddressTy);
-  Builder.CreateStore(CGM.getEndianlessValue(Address), AddressPtr);
+  Builder.CreateStore(TrAddress, AddressPtr);
 
-  llvm::Value *Ptr = emitExpr(Arguments[3])->load(Builder, CGM);
-  llvm::Value *Length = emitExpr(Arguments[4])->load(Builder, CGM);
+  llvm::Value *Ptr = emitExpr(Arguments[2])->load(Builder, CGM);
+  llvm::Value *Length = emitExpr(Arguments[3])->load(Builder, CGM);
 
-  llvm::Value *OutPtr = emitExpr(Arguments[5])->load(Builder, CGM);
-  llvm::Value *OutLength = emitExpr(Arguments[6])->load(Builder, CGM);
+  llvm::Value *OutPtr = emitExpr(Arguments[4])->load(Builder, CGM);
+  llvm::Value *OutLength = emitExpr(Arguments[5])->load(Builder, CGM);
+
 
   llvm::Value *Val = CGM.emitCallStatic(Gas, AddressPtr, Ptr, Length);
 
@@ -2276,7 +2282,6 @@ ExprValuePtr CodeGenFunction::emitAsmSpecialCallExpr(const AsmIdentifier *SI,
     emitAsmCallDataCopy(CE);
     return std::make_shared<ExprValue>();
   case AsmIdentifier::SpecialIdentifier::address:
-      // return ExprValue::getRValue(CE, CGM.emitGetAddress());
     return ExprValue::getRValue(
         CE, Builder.CreateZExtOrTrunc(CGM.emitGetAddress(), CGM.Int256Ty));
   /// object
