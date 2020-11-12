@@ -2276,6 +2276,7 @@ ExprValuePtr CodeGenFunction::emitAsmSpecialCallExpr(const AsmIdentifier *SI,
     emitAsmCallDataCopy(CE);
     return std::make_shared<ExprValue>();
   case AsmIdentifier::SpecialIdentifier::address:
+      // return ExprValue::getRValue(CE, CGM.emitGetAddress());
     return ExprValue::getRValue(
         CE, Builder.CreateZExtOrTrunc(CGM.emitGetAddress(), CGM.Int256Ty));
   /// object
